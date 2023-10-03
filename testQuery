@@ -1,0 +1,25 @@
+INSERT INTO Session1 (id, date, time, session_type) values ('1', '2023-09-25', '09:00','morning'), ('2', '2023-09-25', '15:00', 'evening'), ('3', '2023-09-26', '09:00', 'morning'), ('4', '2023-09-26', '15:00', 'evening'), ('5', '2023-09-27', '09:00', 'morning'), ('6', '2023-09-27', '15:00', 'evening');
+
+INSERT INTO Volunteers1 (id, name, email, phone_number, cancelled) values ('1', 'anne', 'anupkg@gmail.com','123456789', 'false'), ('2', 'shan', 'shan1@gmail.com', '2345678910', 'false'), ('3', 'dan', 'dan1@gmail.com','3456789120', 'false'), ('4', 'daniel', 'daniel7@gmail.com', '4567891234', 'false'), ('5', 'shadi', 'shadi4@gmail.com', '789012345', 'false'), ('6', 'barath', 'barath1@gmail.com', '9876543210', 'false');
+
+UPDATE Volunteers1 SET id= 01 WHERE id=1;
+UPDATE Volunteers1 SET id= 02 WHERE id=2;
+UPDATE Volunteers1 SET id=03  WHERE id=3;
+UPDATE Volunteers1 SET id= 04 WHERE id=4;
+UPDATE Volunteers1 SET id= 05 WHERE id=5;
+UPDATE Volunteers1 SET id= 06 WHERE id=6;
+
+
+
+
+
+
+
+INSERT INTO Booking2 (volunteer_id, session_id, status)
+VALUES 
+  (1, 1, 'available'),
+  (2, 2, 'available'),
+  (3, 3, 'available'),
+  (4, 4, 'available'),
+  (5, 5, 'available'),
+  (6, 6, 'available');
