@@ -56,62 +56,58 @@ const db = new Pool({
         console.error('Volunteer generation failed:', error);
     })
 
-    // b.Add two sessions a day
-    async function AddTwoSessions() {
-      const startDate = new Date('2023-10-01');
-      const endDate = new Date('2023-10-31');
 
-      const sessionTimes = ['morning', 'evening'];
 
-      let currentDate = startDate;
-      while (currentDate <= endDate) {
-          for (const sessionTime of sessionTimes) {
-              let sessionDate = currentDate.toISOString().split('T')[0];
+// b. add 2 sessions a day
+// Function to add afternoon and night sessions for a month
+async function addAfternoonAndNightSessions() {
+  const startDate = new Date('2023-09-24');
+  const endDate = new Date('2023-10-24');
 
-              let sessionTimeValue;
-           let sessionType;
+  // Loop through each day within the specified range
+  while (startDate <= endDate) {
+    const date = startDate.toISOString().split('T')[0]; // Get date in 'YYYY-MM-DD' format
 
-           if (sessionTime === 'morning') {
-           sessionTimeValue = '08:00:00';
-             sessionType = 'morning';
-             } else {
-           sessionTimeValue = '15:00:00';
-             sessionType = 'evening';
-}
+    // Add afternoon session
+    const afternoonTime = '15:00:00';
+    const afternoonQuery = {
+      text: "INSERT INTO Session1 (date, time, session_type) VALUES ($1, $2, 'Afternoon')",
+      values: [date, afternoonTime],
+    };
 
-              
-              let isBooked = Math.random() < 0.2;
+    try {
+      await db.query(afternoonQuery);
+      console.log(`Inserted afternoon session for ${date}`);
+    } catch (error) {
+      console.error(`Error inserting afternoon session for ${date}`, error);
+    }
 
-  // console.log(`processing date: ${sessionDate}, time: ${sessionTime}, type: ${sessionType}, booked: ${isBooked} `);
+    // Add night session
+    const nightTime = '21:00:00';
+    const nightQuery = {
+      text: "INSERT INTO Session1 (date, time, session_type) VALUES ($1, $2, 'Night')",
+      values: [date, nightTime],
+    };
 
-//sql query to insert a session
-  const insertQuery = {
-      text: 'INSERT INTO sessions (date, time, session_type, booked) VALUES ($1, $2, $3, $4)',
-      values: [sessionDate, sessionTimeValue, sessionType, isBooked]
-  };
+    try {
+      await db.query(nightQuery);
+      console.log(`Inserted night session for ${date}`);
+    } catch (error) {
+      console.error(`Error inserting night session for ${date}`, error);
+    }
 
-  try {
-      await db.query(insertQuery);
-      console.log(`Inserted session for ${sessionDate} (${sessionTime})`);
-  } catch (error) {
-      console.error(`Error inserting session for ${sessionDate} (${sessionTime}):`, error);
+    // Increment date for the next iteration
+    startDate.setDate(startDate.getDate() + 1);
   }
+
+  console.log('Afternoon and night sessions generation completed for the month.');
 }
 
-// Move to the next day
-
-currentDate.setDate(currentDate.getDate() + 1);
-}
-
-
-      
-// call the add session function
-      AddTwoSessions()
-          .then(() => {
-              console.log('Session generation completed.');
-          
-          })
-          .catch((error) => {
-              console.error('Session generation failed:', error);
-          
-          });
+// Call the function to add afternoon and night sessions
+addAfternoonAndNightSessions()
+  .then(() => {
+    console.log('Data generation completed.');
+  })
+  .catch((error) => {
+    console.error('Data generation failed:', error);
+  });

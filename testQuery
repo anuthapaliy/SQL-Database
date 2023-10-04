@@ -10,6 +10,34 @@ UPDATE Volunteers1 SET id= 05 WHERE id=5;
 UPDATE Volunteers1 SET id= 06 WHERE id=6;
 
 
+-- add 2 sessions a day
+(-- Ensure you have morning and evening sessions for each day
+INSERT INTO sessions (date, time, session_type, booked)
+SELECT date, time, 'Morning' AS session_type, false AS booked
+FROM sessions
+WHERE session_type NOT IN ('Morning', 'Evening');
+
+-- Add 'Afternoon' sessions
+INSERT INTO sessions (date, time, session_type, booked)
+SELECT date, time, 'Afternoon' AS session_type, false AS booked
+FROM sessions
+WHERE session_type NOT IN ('Morning', 'Evening', 'Afternoon', 'Night');
+
+-- Add 'Night' sessions
+INSERT INTO sessions (date, time, session_type, booked)
+SELECT date, time, 'Night' AS session_type, false AS booked
+FROM sessions
+WHERE session_type NOT IN ('Morning', 'Evening', 'Afternoon', 'Night');
+)
+
+
+SELECT * FROM sessions
+ORDER BY date ASC;
+
+-- want to add 2 sessions for a month
+SELECT * FROM sessions
+WHERE date IN ('2023-09-24', '2023-09-25')
+ORDER BY date ASC, session_type ASC, time ASC;
 
 
 
