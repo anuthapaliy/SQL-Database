@@ -109,8 +109,13 @@ async function addChristmasSessions() {
 
 const christmasDay = "2023-12-25";
 
-// Inside loop that generates sessions, check if its Christmas Day
-if (christmasDay === christmasDay) {
+
+
+// Create a Date object for the current date
+const currentDate = new Date();
+const currentDateString = currentDate.toISOString().split("T")[0];
+
+if (christmasDay === currentDateString) {
   const christmasMorningSession = {
     date: christmasDay,
     time: "10:00:00",
@@ -118,6 +123,8 @@ if (christmasDay === christmasDay) {
   };
   sessionData.push(christmasMorningSession);
 }
+
+
 
 //c. Function to generate random data and allocate sessions to volunteers
 async function generateDataAndAllocateSessions() {
