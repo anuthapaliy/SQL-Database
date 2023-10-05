@@ -127,22 +127,36 @@ JOIN Session1 s ON b.session_id = s.id
 WHERE AGE(s.date, current_date) < INTERVAL '2 days';
 
 -- k. Who is the most likely volunteer to volunteer on Christmas Day?
-INSERT INTO Session1 (date, time, session_type)
-VALUES ('2023-12-25', '10:00:00', 'Morning');
- 
-SELECT *
-FROM Session1
-WHERE date = '2023-12-25';
-
-
-SELECT v.name, v.email, COUNT(*) AS session_count
+      SELECT v.name AS volunteer_name, COUNT(b.session_id) AS allocated_sessions
 FROM Volunteers1 v
 JOIN Booking3 b ON v.id = b.volunteer_id
 JOIN Session1 s ON b.session_id = s.id
-WHERE s.date = '2023-12-25'
-GROUP BY v.name, v.email
-ORDER BY session_count DESC
+WHERE s.date = '2023-12-25' -- Christmas Day
+GROUP BY v.name
+ORDER BY allocated_sessions DESC
 LIMIT 1;
+
+-- Which volunteers only volunteer on weekends?
+    SELECT v.name AS volunteer_name
+FROM Volunteers1 v
+JOIN Booking3 b ON v.id = b.volunteer_id
+JOIN Session1 s ON b.session_id = s.id
+WHERE EXTRACT(DOW FROM s.date) IN (0, 6)  -- 0 represents Sunday, 6 represents Saturday
+GROUP BY v.name
+HAVING COUNT(DISTINCT s.date) = COUNT(CASE WHEN EXTRACT(DOW FROM s.date) IN (0, 6) THEN 1 ELSE NULL END)
+ORDER BY volunteer_name;
+
+
+
+SELECT DISTINCT v.name AS volunteer_name
+FROM Volunteers1 v
+LEFT JOIN Booking3 b ON v.id = b.volunteer_id
+LEFT JOIN Session1 s ON b.session_id = s.id
+WHERE b.volunteer_id IS NULL OR (
+  EXTRACT(DOW FROM s.date) NOT IN (0, 6)
+)
+ORDER BY volunteer_name;
+
 
 
 
