@@ -1,56 +1,5 @@
 INSERT INTO Session1 (id, date, time, session_type) values ('1', '2023-09-25', '09:00','morning'), ('2', '2023-09-25', '15:00', 'evening'), ('3', '2023-09-26', '09:00', 'morning'), ('4', '2023-09-26', '15:00', 'evening'), ('5', '2023-09-27', '09:00', 'morning'), ('6', '2023-09-27', '15:00', 'evening');
 
-INSERT INTO Volunteers1 (id, name, email, phone_number, cancelled) values ('1', 'anne', 'anupkg@gmail.com','123456789', 'false'), ('2', 'shan', 'shan1@gmail.com', '2345678910', 'false'), ('3', 'dan', 'dan1@gmail.com','3456789120', 'false'), ('4', 'daniel', 'daniel7@gmail.com', '4567891234', 'false'), ('5', 'shadi', 'shadi4@gmail.com', '789012345', 'false'), ('6', 'barath', 'barath1@gmail.com', '9876543210', 'false');
-
-UPDATE Volunteers1 SET id= 01 WHERE id=1;
-UPDATE Volunteers1 SET id= 02 WHERE id=2;
-UPDATE Volunteers1 SET id=03  WHERE id=3;
-UPDATE Volunteers1 SET id= 04 WHERE id=4;
-UPDATE Volunteers1 SET id= 05 WHERE id=5;
-UPDATE Volunteers1 SET id= 06 WHERE id=6;
-
-
--- add 2 sessions a day
-(-- Ensure you have morning and evening sessions for each day
-INSERT INTO sessions (date, time, session_type, booked)
-SELECT date, time, 'Morning' AS session_type, false AS booked
-FROM sessions
-WHERE session_type NOT IN ('Morning', 'Evening');
-
--- Add 'Afternoon' sessions
-INSERT INTO sessions (date, time, session_type, booked)
-SELECT date, time, 'Afternoon' AS session_type, false AS booked
-FROM sessions
-WHERE session_type NOT IN ('Morning', 'Evening', 'Afternoon', 'Night');
-
--- Add 'Night' sessions
-INSERT INTO sessions (date, time, session_type, booked)
-SELECT date, time, 'Night' AS session_type, false AS booked
-FROM sessions
-WHERE session_type NOT IN ('Morning', 'Evening', 'Afternoon', 'Night');
-)
-
-
-SELECT * FROM sessions
-ORDER BY date ASC;
-
--- want to add 2 sessions for a month
-SELECT * FROM sessions
-WHERE date IN ('2023-09-24', '2023-09-25')
-ORDER BY date ASC, session_type ASC, time ASC;
-
-
-
-
-
-INSERT INTO Booking3 (volunteer_id, session_id)
-VALUES 
-  (1, 1),
-  (2, 2),
-  (3, 3),
-  (4, 4),
-  (5, 5),
-  (6, 6);
 
 -- 3.Write SQL queries to answer the following questions:
 --     a.Which volunteer volunteers most often?
@@ -199,3 +148,61 @@ LIMIT 1;
 
 
 
+
+
+
+
+
+-- for my records
+
+INSERT INTO Volunteers1 (id, name, email, phone_number, cancelled) values ('1', 'anne', 'anupkg@gmail.com','123456789', 'false'), ('2', 'shan', 'shan1@gmail.com', '2345678910', 'false'), ('3', 'dan', 'dan1@gmail.com','3456789120', 'false'), ('4', 'daniel', 'daniel7@gmail.com', '4567891234', 'false'), ('5', 'shadi', 'shadi4@gmail.com', '789012345', 'false'), ('6', 'barath', 'barath1@gmail.com', '9876543210', 'false');
+
+UPDATE Volunteers1 SET id= 01 WHERE id=1;
+UPDATE Volunteers1 SET id= 02 WHERE id=2;
+UPDATE Volunteers1 SET id=03  WHERE id=3;
+UPDATE Volunteers1 SET id= 04 WHERE id=4;
+UPDATE Volunteers1 SET id= 05 WHERE id=5;
+UPDATE Volunteers1 SET id= 06 WHERE id=6;
+
+
+-- add 2 sessions a day
+(-- Ensure you have morning and evening sessions for each day
+INSERT INTO sessions (date, time, session_type, booked)
+SELECT date, time, 'Morning' AS session_type, false AS booked
+FROM sessions
+WHERE session_type NOT IN ('Morning', 'Evening');
+
+-- Add 'Afternoon' sessions
+INSERT INTO sessions (date, time, session_type, booked)
+SELECT date, time, 'Afternoon' AS session_type, false AS booked
+FROM sessions
+WHERE session_type NOT IN ('Morning', 'Evening', 'Afternoon', 'Night');
+
+-- Add 'Night' sessions
+INSERT INTO sessions (date, time, session_type, booked)
+SELECT date, time, 'Night' AS session_type, false AS booked
+FROM sessions
+WHERE session_type NOT IN ('Morning', 'Evening', 'Afternoon', 'Night');
+)
+
+
+SELECT * FROM sessions
+ORDER BY date ASC;
+
+-- want to add 2 sessions for a month
+SELECT * FROM sessions
+WHERE date IN ('2023-09-24', '2023-09-25')
+ORDER BY date ASC, session_type ASC, time ASC;
+
+
+
+
+
+INSERT INTO Booking3 (volunteer_id, session_id)
+VALUES 
+  (1, 1),
+  (2, 2),
+  (3, 3),
+  (4, 4),
+  (5, 5),
+  (6, 6);
