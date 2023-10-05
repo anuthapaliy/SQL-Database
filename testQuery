@@ -52,7 +52,148 @@ VALUES
   (5, 5),
   (6, 6);
 
+-- 3.Write SQL queries to answer the following questions:
+--     a.Which volunteer volunteers most often?
 
+SELECT volunteer_id, COUNT(*) AS booking_count
+FROM Booking3
+GROUP BY volunteer_id
+ORDER BY booking_count DESC
+LIMIT 1;
+
+-- b.Which volunteer volunteers for the most mornings?
+
+SELECT b.volunteer_id, COUNT(*) AS morning_count
+FROM Booking3 b
+JOIN Session1 s ON b.session_id = s.id
+WHERE s.session_type = 'Morning'
+GROUP BY b.volunteer_id
+ORDER BY morning_count DESC
+LIMIT 1;
+
+-- 
+-- c.Which volunteer volunteers for the most evenings?
+SELECT b.volunteer_id, COUNT(*) AS evening_count
+FROM Booking3 b
+JOIN Session1 s ON b.session_id = s.id
+WHERE s.session_type = 'Evening'
+GROUP BY b.volunteer_id
+ORDER BY evening_count DESC
+LIMIT 1;
+
+-- d.Who is the volunteer who volunteered in the last month, who started volunteering earliest in history?
+SELECT volunteer_id, MIN(date) AS first_volunteered_date
+FROM Booking3 b
+JOIN Session1 s ON b.session_id = s.id
+WHERE s.date >= DATE_TRUNC('month', CURRENT_DATE) - INTERVAL '1 month'
+GROUP BY volunteer_id
+ORDER BY first_volunteered_date ASC
+LIMIT 1;
+
+-- e.Which volunteers haven't volunteered in the last 4 weeks?
+SELECT v.id AS volunteer_id, v.name AS volunteer_name
+FROM Volunteers1 v
+WHERE v.id NOT IN (
+  SELECT DISTINCT b.volunteer_id
+  FROM Booking3 b
+  JOIN Session1 s ON b.session_id = s.id
+  WHERE s.date >= DATE_TRUNC('month', CURRENT_DATE) - INTERVAL '4 weeks'
+);
+-- f.What is the most common day of the week each volunteer volunteers?
+WITH VolunteerSessionCounts AS (
+  SELECT
+    volunteer_id,
+    TO_CHAR(s.date, 'Day') AS day_of_week,
+    COUNT(*) AS session_count
+  FROM Booking3 b
+  JOIN Session1 s ON b.session_id = s.id
+  GROUP BY volunteer_id, day_of_week
+)
+
+SELECT DISTINCT ON (volunteer_id)
+  volunteer_id,
+  day_of_week,
+  session_count
+ORDER BY volunteer_id, session_count DESC;
+
+--g. What is the distribution of ratios of morning vs evening volunteering?
+-- E.g. some possible answers are:
+-- "All volunteers only volunteer in the morning or the evening"
+-- "85% of volunteers only volunteering in the morning or the evening, but 15% do both"
+-- "80% of volunteers volunteer at one time more than 60% of the time in mornings"
+
+
+WITH VolunteerSessionCounts AS (
+  SELECT
+    volunteer_id,
+    SUM(CASE WHEN s.session_type = 'Morning' THEN 1 ELSE 0 END) AS morning_count,
+    SUM(CASE WHEN s.session_type = 'Evening' THEN 1 ELSE 0 END) AS evening_count
+  FROM Booking3 b
+  JOIN Session1 s ON b.session_id = s.id
+  GROUP BY volunteer_id
+)
+
+SELECT
+  COUNT(*) AS volunteer_count,
+  SUM(CASE WHEN morning_count > evening_count THEN 1 ELSE 0 END) AS morning_preferred_count,
+  SUM(CASE WHEN evening_count > morning_count THEN 1 ELSE 0 END) AS evening_preferred_count,
+  SUM(CASE WHEN morning_count = evening_count THEN 1 ELSE 0 END) AS balanced_count
+FROM VolunteerSessionCounts;
+
+-- h.What is the most common first name of a volunteer, factoring in frequency of volunteering? (i.e. if Daniel volunteers five times, and two people named Anu each volunteer twice, Daniel is the most common name).
+WITH VolunteerNameCounts AS (
+SELECT
+    LEFT(v.name, POSITION(' ' IN v.name) - 1) AS first_name,
+    COUNT(*) AS volunteer_count
+  FROM Volunteers1 v
+  JOIN Booking3 b ON v.id = b.volunteer_id
+  GROUP BY first_name
+)
+
+SELECT first_name, SUM(volunteer_count) AS total_count
+FROM VolunteerNameCounts
+GROUP BY first_name
+ORDER BY total_count DESC
+LIMIT 1;
+
+-- i.Who has cancelled the most sessions?
+  SELECT volunteer_id, COUNT(*) AS cancellation_count
+FROM Booking3
+WHERE volunteer_id IS NOT NULL
+AND session_id IS NOT NULL
+AND session_id NOT IN (
+  SELECT DISTINCT session_id
+  FROM Booking3
+  WHERE volunteer_id IS NOT NULL
+  AND session_id IS NOT NULL
+)
+GROUP BY volunteer_id
+ORDER BY cancellation_count DESC
+LIMIT 1;
+
+-- j.How often are sessions cancelled less than 48 hours before the session itself?
+    SELECT COUNT(*) AS late_cancellation_count
+FROM Booking3 b
+JOIN Session1 s ON b.session_id = s.id
+WHERE AGE(s.date, current_date) < INTERVAL '2 days';
+
+-- k. Who is the most likely volunteer to volunteer on Christmas Day?
+INSERT INTO Session1 (date, time, session_type)
+VALUES ('2023-12-25', '10:00:00', 'Morning');
+ 
+SELECT *
+FROM Session1
+WHERE date = '2023-12-25';
+
+
+SELECT v.name, v.email, COUNT(*) AS session_count
+FROM Volunteers1 v
+JOIN Booking3 b ON v.id = b.volunteer_id
+JOIN Session1 s ON b.session_id = s.id
+WHERE s.date = '2023-12-25'
+GROUP BY v.name, v.email
+ORDER BY session_count DESC
+LIMIT 1;
 
 
 
