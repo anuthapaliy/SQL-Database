@@ -56,21 +56,20 @@ WHERE v.id NOT IN (
   WHERE s.date >= DATE_TRUNC('month', CURRENT_DATE) - INTERVAL '4 weeks'
 );
 -- f.What is the most common day of the week each volunteer volunteers?
-WITH VolunteerSessionCounts AS (
+ WITH VolunteerSessionCounts AS (
   SELECT
     volunteer_id,
     TO_CHAR(s.date, 'Day') AS day_of_week,
-    COUNT(*) AS session_count
+    COUNT(*) AS session_count,
+    ROW_NUMBER() OVER (PARTITION BY volunteer_id ORDER BY COUNT(*) DESC) AS rn
   FROM Booking3 b
   JOIN Session1 s ON b.session_id = s.id
   GROUP BY volunteer_id, day_of_week
 )
 
-SELECT DISTINCT ON (volunteer_id)
-  volunteer_id,
-  day_of_week,
-  session_count
-ORDER BY volunteer_id, session_count DESC;
+SELECT volunteer_id, day_of_week, session_count
+FROM VolunteerSessionCounts
+WHERE rn = 1;
 
 --g. What is the distribution of ratios of morning vs evening volunteering?
 -- E.g. some possible answers are:
