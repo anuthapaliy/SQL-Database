@@ -31,13 +31,20 @@ ORDER BY evening_count DESC
 LIMIT 1;
 
 -- d.Who is the volunteer who volunteered in the last month, who started volunteering earliest in history?
-SELECT volunteer_id, MIN(date) AS first_volunteered_date
-FROM Booking3 b
-JOIN Session1 s ON b.session_id = s.id
-WHERE s.date >= DATE_TRUNC('month', CURRENT_DATE) - INTERVAL '1 month'
+--  (Feedback-I was asking "Who volunteered first ever, of all the people who volunteered in the last month", whereas I think you've answered "Of all the sessions in the last month, who volunteered for the first one"?)-amend on query 
+SELECT volunteer_id, MIN(earliest_volunteered_date) AS earliest_volunteered_date
+FROM (
+    SELECT volunteer_id, MIN(s.date) AS earliest_volunteered_date
+    FROM Booking3 b
+    JOIN Session1 s ON b.session_id = s.id
+    WHERE s.date >= DATE_TRUNC('month', CURRENT_DATE) - INTERVAL '1 month'
+    GROUP BY volunteer_id
+) AS last_month_volunteers
 GROUP BY volunteer_id
-ORDER BY first_volunteered_date ASC
+ORDER BY earliest_volunteered_date ASC
 LIMIT 1;
+
+
 
 -- e.Which volunteers haven't volunteered in the last 4 weeks?
 SELECT v.id AS volunteer_id, v.name AS volunteer_name
