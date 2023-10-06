@@ -2,9 +2,9 @@ const { Pool } = require("pg");
 const dotenv = require("dotenv");
 dotenv.config();
 
+console.log(process.env.DB_URL)
 const db = new Pool({
-  connectionString: process.env.DB_URL,
-  ssl: { rejectUnauthorized: false },
+  connectionString: process.env.DB_URL + "?sslmode=disable"
 });
 
 // a. Function to add volunteers
@@ -21,7 +21,7 @@ async function addVolunteers() {
     const cancelled = Math.random() < 0.2;
 
     const query = {
-      text: "INSERT INTO Volunteers1 (name, email, phone_number, cancelled) VALUES ($1, $2, $3, $4)",
+      text: "INSERT INTO volunteer (name, email, phone_number, cancelled) VALUES ($1, $2, $3, $4)",
       values: [name, email, phone_number, cancelled],
     };
 
@@ -47,7 +47,7 @@ async function addAfternoonAndNightSessions() {
     // Add afternoon session
     const afternoonTime = "15:00:00";
     const afternoonQuery = {
-      text: "INSERT INTO Session1 (date, time, session_type) VALUES ($1, $2, 'Afternoon')",
+      text: "INSERT INTO session (date, time, session_type) VALUES ($1, $2, 'Afternoon')",
       values: [date, afternoonTime],
     };
 
@@ -61,7 +61,7 @@ async function addAfternoonAndNightSessions() {
     // Add night session
     const nightTime = "21:00:00";
     const nightQuery = {
-      text: "INSERT INTO Session1 (date, time, session_type) VALUES ($1, $2, 'Night')",
+      text: "INSERT INTO session (date, time, session_type) VALUES ($1, $2, 'Night')",
       values: [date, nightTime],
     };
 
@@ -92,7 +92,7 @@ async function addChristmasSessions() {
   };
 
   const christmasQuery = {
-    text: "Insert into Session1 (date, time, session_type) values ($1, $2, $3)",
+    text: "Insert into session (date, time, session_type) values ($1, $2, $3)",
     values: [
       christmasSession.date,
       christmasSession.time,
@@ -129,7 +129,7 @@ async function generateDataAndAllocateSessions() {
 
     // Insert volunteers data into the Volunteers1 table
     const insertVolunteersQuery =
-      "INSERT INTO Volunteers1 (name, email, phone_number, cancelled) VALUES ($1, $2, $3, $4) RETURNING id";
+      "INSERT INTO volunteer (name, email, phone_number, cancelled) VALUES ($1, $2, $3, $4) RETURNING id";
 
     const volunteerIds = [];
     for (const volunteerData of volunteersData) {
@@ -174,7 +174,7 @@ async function generateDataAndAllocateSessions() {
     // Insert sessions data into the Session1 table
 
     const insertSessionsQuery =
-      "INSERT INTO Session1 (date, time, session_type) VALUES ($1, $2, $3) RETURNING id";
+      "INSERT INTO session (date, time, session_type) VALUES ($1, $2, $3) RETURNING id";
 
     const sessionIds = [];
     for (const sessionData of sessionsData) {
@@ -205,7 +205,7 @@ async function generateDataAndAllocateSessions() {
     // Insert allocated sessions data into the Booking3 table
 
     const insertAllocatedSessionsQuery =
-      "INSERT INTO Booking3 (volunteer_id, session_id) VALUES ($1, $2)";
+      "INSERT INTO booking (volunteer_id, session_id) VALUES ($1, $2)";
 
     for (const allocatedSessionData of allocatedSessionsData) {
       await db.query(insertAllocatedSessionsQuery, [
