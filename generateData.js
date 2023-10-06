@@ -78,11 +78,15 @@ async function addAfternoonAndNightSessions() {
 }
 
 // Function to insert a Christmas Day session(extra added for sql queries questions)
-
-
 async function addChristmasSessions() {
+  // Define start and end years for generating christmas day session
+  const startYear = 2023;
+  const endYear = 2027;
+
+  for (let year = startYear; year <= endYear; year++) {
+    // Generate random session data for christmas day
   const christmasSession = {
-    date: "2023-12-25",
+    date: `${year}-12-25`,
     time: "09:00:00",
     session_type: "Morning",
   };
@@ -107,24 +111,7 @@ async function addChristmasSessions() {
   }
 }
 
-const christmasDay = "2023-12-25";
-
-
-
-// Create a Date object for the current date
-const currentDate = new Date();
-const currentDateString = currentDate.toISOString().split("T")[0];
-
-if (christmasDay === currentDateString) {
-  const christmasMorningSession = {
-    date: christmasDay,
-    time: "10:00:00",
-    session_type: "Morning",
-  };
- 
 }
-
-
 
 //c. Function to generate random data and allocate sessions to volunteers
 async function generateDataAndAllocateSessions() {
@@ -158,8 +145,8 @@ async function generateDataAndAllocateSessions() {
     // Generate random session data
 
     const sessionsData = [];
-    const startDate = new Date("2023-09-24");
-    const endDate = new Date("2023-10-24");
+    const startDate = new Date("2023-12-25");
+    const endDate = new Date("2027-12-25");
 
     for (
       let currentDate = startDate;

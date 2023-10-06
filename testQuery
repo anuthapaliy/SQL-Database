@@ -127,14 +127,17 @@ JOIN Session1 s ON b.session_id = s.id
 WHERE AGE(s.date, current_date) < INTERVAL '2 days';
 
 -- k. Who is the most likely volunteer to volunteer on Christmas Day?
-      SELECT v.name AS volunteer_name, COUNT(b.session_id) AS allocated_sessions
+
+SELECT v.name, COUNT(s.date) AS christmas_count
 FROM Volunteers1 v
 JOIN Booking3 b ON v.id = b.volunteer_id
 JOIN Session1 s ON b.session_id = s.id
-WHERE s.date = '2023-12-25' -- Christmas Day
+WHERE EXTRACT(YEAR FROM s.date) BETWEEN 2023 AND 2027
+  AND EXTRACT(MONTH FROM s.date) = 12
+  AND EXTRACT(DAY FROM s.date) = 25
 GROUP BY v.name
-ORDER BY allocated_sessions DESC
-LIMIT 1;
+ORDER BY christmas_count DESC;
+
 
 -- Which volunteers only volunteer on weekends?
     SELECT v.name AS volunteer_name
