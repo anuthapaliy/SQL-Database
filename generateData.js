@@ -79,7 +79,7 @@ async function addAfternoonAndNightSessions() {
 
 // Function to insert a Christmas Day session(extra added for sql queries questions)
 
-const sessionData = [];
+
 async function addChristmasSessions() {
   const christmasSession = {
     date: "2023-12-25",
@@ -121,7 +121,7 @@ if (christmasDay === currentDateString) {
     time: "10:00:00",
     session_type: "Morning",
   };
-  sessionData.push(christmasMorningSession);
+ 
 }
 
 
