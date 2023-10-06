@@ -1,5 +1,7 @@
 # Project Title
 
+## Test Cases
+
 
 ## Coding Standards
 
@@ -14,11 +16,11 @@ sql/
 
 - File name and naming styles
 
-| File | Style | Explanation |
-| ---- | ----- | ----------- |
-| JS   | camel | 
-| SQL  | snake |
-
+| File | File Name Style | Extension | Explanation |
+| ---- | --------------- | ----------| ----------- |
+| JS   | camel           | .js       |             |
+| SQL  | snake           | .sql      |             |
+          
 SQL Specific
 - use snake case for SQL table names and identifiers
 - agree on either using plural or singulr for SQL entity names (book, volunteer)
