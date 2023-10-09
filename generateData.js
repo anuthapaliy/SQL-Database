@@ -21,7 +21,7 @@ async function addVolunteers() {
     const cancelled = Math.random() < 0.2;
 
     const query = {
-      text: "INSERT INTO Volunteers1 (name, email, phone_number, cancelled) VALUES ($1, $2, $3, $4)",
+      text: "INSERT INTO volunteers ( name, email, phone_number, cancelled) VALUES ($1, $2, $3, $4)",
       values: [name, email, phone_number, cancelled],
     };
 
@@ -47,7 +47,7 @@ async function addAfternoonAndNightSessions() {
     // Add afternoon session
     const afternoonTime = "15:00:00";
     const afternoonQuery = {
-      text: "INSERT INTO Session1 (date, time, session_type) VALUES ($1, $2, 'Afternoon')",
+      text: "INSERT INTO Session (date, time, session_type) VALUES ($1, $2, 'Afternoon')",
       values: [date, afternoonTime],
     };
 
@@ -61,7 +61,7 @@ async function addAfternoonAndNightSessions() {
     // Add night session
     const nightTime = "21:00:00";
     const nightQuery = {
-      text: "INSERT INTO Session1 (date, time, session_type) VALUES ($1, $2, 'Night')",
+      text: "INSERT INTO Session (date, time, session_type) VALUES ($1, $2, 'Night')",
       values: [date, nightTime],
     };
 
@@ -85,37 +85,42 @@ async function addChristmasSessions() {
 
   for (let year = startYear; year <= endYear; year++) {
     // Generate random session data for christmas day
-  const christmasSession = {
-    date: `${year}-12-25`,
-    time: "09:00:00",
-    session_type: "Morning",
-  };
+    const christmasSession = {
+      date: `${year}-12-25`,
+      time: "09:00:00",
+      session_type: "Morning",
+    };
 
-  const christmasQuery = {
-    text: "Insert into Session1 (date, time, session_type) values ($1, $2, $3)",
-    values: [
-      christmasSession.date,
-      christmasSession.time,
-      christmasSession.session_type,
-    ],
-  };
+    const christmasQuery = {
+      text: "Insert into Session (date, time, session_type) values ($1, $2, $3)",
+      values: [
+        christmasSession.date,
+        christmasSession.time,
+        christmasSession.session_type,
+      ],
+    };
 
-  try {
-    await db.query(christmasQuery);
-    console.log(`Inserted Christmas Day session for ${christmasSession.date}`);
-  } catch (error) {
-    console.error(
-      `Error inserting Christmas Day session for ${christmasSession.date}:`,
-      error,
-    );
+    try {
+      await db.query(christmasQuery);
+      console.log(
+        `Inserted Christmas Day session for ${christmasSession.date}`,
+      );
+    } catch (error) {
+      console.error(
+        `Error inserting Christmas Day session for ${christmasSession.date}:`,
+        error,
+      );
+    }
   }
-}
-
 }
 
 //c. Function to generate random data and allocate sessions to volunteers
 async function generateDataAndAllocateSessions() {
   try {
+    // Initialize sets to store unique sessions and combinations
+    const sessionSet = new Set();
+    const allocatedCombinations = new Set();
+
     // Generate random volunteers data
     const volunteersData = [];
     for (let i = 1; i <= 100; i++) {
@@ -127,9 +132,9 @@ async function generateDataAndAllocateSessions() {
       });
     }
 
-    // Insert volunteers data into the Volunteers1 table
+    // Insert volunteers data into the Volunteers table
     const insertVolunteersQuery =
-      "INSERT INTO Volunteers1 (name, email, phone_number, cancelled) VALUES ($1, $2, $3, $4) RETURNING id";
+      "INSERT INTO volunteers (name, email, phone_number, cancelled) VALUES ($1, $2, $3, $4) RETURNING id";
 
     const volunteerIds = [];
     for (const volunteerData of volunteersData) {
@@ -143,7 +148,6 @@ async function generateDataAndAllocateSessions() {
     }
 
     // Generate random session data
-
     const sessionsData = [];
     const startDate = new Date("2023-12-25");
     const endDate = new Date("2027-12-25");
@@ -167,14 +171,24 @@ async function generateDataAndAllocateSessions() {
         session_type: "Evening",
       };
 
-      sessionsData.push(morningSession);
-      sessionsData.push(eveningSession);
+      // Check and insert morning session
+      const morningSessionKey = `${morningSession.date}-${morningSession.time}`;
+      if (!sessionSet.has(morningSessionKey)) {
+        sessionSet.add(morningSessionKey);
+        sessionsData.push(morningSession);
+      }
+
+      // Check and insert evening session
+      const eveningSessionKey = `${eveningSession.date}-${eveningSession.time}`;
+      if (!sessionSet.has(eveningSessionKey)) {
+        sessionSet.add(eveningSessionKey);
+        sessionsData.push(eveningSession);
+      }
     }
 
-    // Insert sessions data into the Session1 table
-
+    // Insert sessions data into the Session table
     const insertSessionsQuery =
-      "INSERT INTO Session1 (date, time, session_type) VALUES ($1, $2, $3) RETURNING id";
+      "INSERT INTO Session (date, time, session_type) VALUES ($1, $2, $3) RETURNING id";
 
     const sessionIds = [];
     for (const sessionData of sessionsData) {
@@ -191,26 +205,39 @@ async function generateDataAndAllocateSessions() {
     for (const volunteerId of volunteerIds) {
       const numberOfSessionsToAllocate = Math.floor(Math.random() * 15) + 1;
 
-      // randomly select and allocate multiple sessions to volunteers
+      // Randomly select and allocate multiple sessions to volunteers
       for (let i = 0; i < numberOfSessionsToAllocate; i++) {
         const randomSessionId =
           sessionIds[Math.floor(Math.random() * sessionIds.length)];
-        allocatedSessionsData.push({
-          volunteer_id: volunteerId,
-          session_id: randomSessionId,
-        });
+
+        // Check and insert combination
+        const combinationKey = `${volunteerId}-${randomSessionId}`;
+        if (!allocatedCombinations.has(combinationKey)) {
+          allocatedCombinations.add(combinationKey);
+          allocatedSessionsData.push({
+            volunteer_id: volunteerId,
+            session_id: randomSessionId,
+            is_cancelled: Math.random() < 0.2, // Simulate some bookings being canceled
+            cancellation_timestamp:
+              Math.random() < 0.2 ? getRandomTimestamp() : null, // Set cancellation timestamp if booking is canceled
+            cancellation_reason:
+              Math.random() < 0.2 ? getRandomCancellationReason() : null, // Set cancellation reason if booking is canceled
+          });
+        }
       }
     }
 
     // Insert allocated sessions data into the Booking3 table
-
     const insertAllocatedSessionsQuery =
-      "INSERT INTO Booking3 (volunteer_id, session_id) VALUES ($1, $2)";
+      "INSERT INTO Booking3 (volunteer_id, session_id, is_cancelled, cancellation_timestamp, cancellation_reason) VALUES ($1, $2, $3, $4, $5)";
 
     for (const allocatedSessionData of allocatedSessionsData) {
       await db.query(insertAllocatedSessionsQuery, [
         allocatedSessionData.volunteer_id,
         allocatedSessionData.session_id,
+        allocatedSessionData.is_cancelled,
+        allocatedSessionData.cancellation_timestamp,
+        allocatedSessionData.cancellation_reason,
       ]);
     }
 
@@ -220,6 +247,28 @@ async function generateDataAndAllocateSessions() {
   } finally {
     // Release the database connection
   }
+}
+
+// Function to generate a random timestamp for cancellations
+function getRandomTimestamp() {
+  const year = 2023 + Math.floor(Math.random() * 5);
+  const month = 1 + Math.floor(Math.random() * 12);
+  const day = 1 + Math.floor(Math.random() * 28);
+  const hour = Math.floor(Math.random() * 24);
+  const minute = Math.floor(Math.random() * 60);
+  const second = Math.floor(Math.random() * 60);
+  return `${year}-${month.toString().padStart(2, "0")}-${day
+    .toString()
+    .padStart(2, "0")} ${hour.toString().padStart(2, "0")}:${minute
+    .toString()
+    .padStart(2, "0")}:${second.toString().padStart(2, "0")}`;
+}
+
+// Function to generate a random cancellation reason
+function getRandomCancellationReason() {
+  const reasons = ["Unavailable", "Emergency", "Other"];
+  const randomIndex = Math.floor(Math.random() * reasons.length);
+  return reasons[randomIndex];
 }
 
 // Main function to generate data and allocate sessions
@@ -237,10 +286,10 @@ async function main() {
     // Insert Christmas Day session
     await addChristmasSessions();
 
-    // Allocate sessions randomly to volunteers
-    // await generateDataAndAllocateSessions;
+    // Generate data for Booking3 table
+    await generateDataAndAllocateSessions();
 
-    console.log("Data generation and session allocation completed.");
+    console.log("Data generation and allocation completed.");
   } catch (error) {
     console.error("Error:", error);
   } finally {

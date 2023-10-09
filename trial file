@@ -1,0 +1,51 @@
+CREATE TABLE Session1 (
+  id SERIAL PRIMARY KEY,
+  date DATE NOT NULL,
+  time TIME NOT NULL,
+  session_type VARCHAR(255) NOT NULL,
+  is_cancelled BOOLEAN NOT NULL DEFAULT FALSE -- New column for cancellation status
+);
+
+
+
+To allow session to be cancelled in my database, i think i can add a new column to the session 1 table to represent the cancellation status.
+
+
+
+
+
+
+-- Example: Mark booking with ID 1 as canceled
+UPDATE Booking3
+SET
+  cancellation_timestamp = NOW(), -- Set the current timestamp
+  cancellation_reason = 'Customer request', -- Set the reason
+  is_cancelled = TRUE
+WHERE id = 1;
+
+
+Insert into Booking3(volunteer_id, session_id, is_cancelled, cancellation_timestamp, cancellation_reason) VALUES (1, 101, )
+
+To change table name-:ALTER TABLE "Volunteers1" RENAME TO volunteers;
+                    
+                    ALTER TABLE Session1 RENAME TO Session;(but sessions already exist so first need to drop-DROP TABLE IF EXISTS Session;))
+
+                    
+to transfer data and all rows from old table to new table(Volunteers1 to volunteers)-:
+INSERT INTO volunteers SELECT * FROM Volunteers1;
+INSERT INTO Session SELECT * FROM Session1; 
+
+-- as i have change my volunteers and Session, i need to update Booking3 table-:full_stack_project_database=> ALTER TABLE Booking3
+  DROP CONSTRAINT booking3_volunteer_id_fkey, -- Drop the existing foreign key constraint for volunteer_id
+  ADD CONSTRAINT booking3_volunteer_id_fkey FOREIGN KEY (volunteer_id) REFERENCES Volunteers(id);
+
+ALTER TABLE Booking3
+  DROP CONSTRAINT booking3_session_id_fkey, -- Drop the existing foreign key constraint for session_id
+  ADD CONSTRAINT booking3_session_id_fkey FOREIGN KEY (session_id) REFERENCES Session(id);
+ALTER TABLE
+ALTER TABLE
+
+
+
+
+

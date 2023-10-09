@@ -1,4 +1,4 @@
-CREATE TABLE Session1 (
+CREATE TABLE Session (
   
   id SERIAL PRIMARY KEY,
   date DATE NOT NULL,

@@ -55,7 +55,8 @@ WHERE v.id NOT IN (
   JOIN Session1 s ON b.session_id = s.id
   WHERE s.date >= DATE_TRUNC('month', CURRENT_DATE) - INTERVAL '4 weeks'
 );
--- f.What is the most common day of the week each volunteer volunteers?
+
+-- -- f.What is the most common day of the week each volunteer volunteers?
  WITH VolunteerSessionCounts AS (
   SELECT
     volunteer_id,
@@ -126,6 +127,7 @@ GROUP BY volunteer_id
 ORDER BY cancellation_count DESC
 LIMIT 1;
 
+
 -- j.How often are sessions cancelled less than 48 hours before the session itself?
     SELECT COUNT(*) AS late_cancellation_count
 FROM Booking3 b
@@ -180,6 +182,30 @@ ORDER BY volunteer_name;
 
 INSERT INTO Volunteers1 (id, name, email, phone_number, cancelled) values ('1', 'anne', 'anupkg@gmail.com','123456789', 'false'), ('2', 'shan', 'shan1@gmail.com', '2345678910', 'false'), ('3', 'dan', 'dan1@gmail.com','3456789120', 'false'), ('4', 'daniel', 'daniel7@gmail.com', '4567891234', 'false'), ('5', 'shadi', 'shadi4@gmail.com', '789012345', 'false'), ('6', 'barath', 'barath1@gmail.com', '9876543210', 'false');
 
+
+-- to add columns in my booking table-:
+
+ALTER TABLE Booking3 Add COLUMN cancellation_timestamp TIMESTAMP;
+alter table booking3 add column cancellation_reason varchar(255);
+alter table Booking3 add column is_cancelled BOOLEAN;
+
+-- to remove rows
+TRUNCATE Booking3;
+
+-- to add unique session_id
+ALTER table Booking3
+ADD UNIQUE (session_id);
+
+INSERT INTO Booking3 (volunteer_id, session_id, is_cancelled, cancellation_timestamp, cancellation_reason)
+VALUES
+  ('1', '1', true, '2023-10-06 08:00', 'sick'),
+  ('2', '2', true, '2023-10-07 05:00', 'session rescheduled'),
+  ('3', '3', true, '2023-10-07 01:00', 'emergency'),
+  ('4', '4', true, '2023-10-08 12:00', 'family issue'),
+  ('5', '5', true, '2023-10-08 07:00', 'health issue');
+
+
+
 UPDATE Volunteers1 SET id= 01 WHERE id=1;
 UPDATE Volunteers1 SET id= 02 WHERE id=2;
 UPDATE Volunteers1 SET id=03  WHERE id=3;
@@ -229,3 +255,16 @@ VALUES
   (4, 4),
   (5, 5),
   (6, 6);
+
+
+  -- Add a cancellation timestamp column
+ALTER TABLE Booking3
+ADD COLUMN cancellation_timestamp TIMESTAMP;
+
+-- Add a cancellation reason column
+ALTER TABLE Booking3
+ADD COLUMN cancellation_reason VARCHAR(255);
+
+-- Add an is_cancelled column
+ALTER TABLE Booking3
+ADD COLUMN is_cancelled BOOLEAN;
