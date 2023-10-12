@@ -5,10 +5,19 @@ INSERT INTO Session1 (id, date, time, session_type) values ('1', '2023-09-25', '
 --     a.Which volunteer volunteers most often?
 
 SELECT volunteer_id, COUNT(*) AS booking_count
-FROM Booking3
+FROM booking
 GROUP BY volunteer_id
 ORDER BY booking_count DESC
 LIMIT 1;
+
+-- Another query, finds the volunteers most often but it includes volunteer's name
+SELECT v.name, COUNT(b.volunteer_id) AS volunteer_count
+FROM volunteers v
+JOIN Booking3 b ON v.id = b.volunteer_id
+GROUP BY v.name
+ORDER BY volunteer_count DESC
+LIMIT 1;
+
 
 -- b.Which volunteer volunteers for the most mornings?
 
@@ -157,7 +166,7 @@ GROUP BY v.name
 HAVING COUNT(DISTINCT s.date) = COUNT(CASE WHEN EXTRACT(DOW FROM s.date) IN (0, 6) THEN 1 ELSE NULL END)
 ORDER BY volunteer_name;
 
-
+-- OR
 
 SELECT DISTINCT v.name AS volunteer_name
 FROM Volunteers1 v
@@ -196,13 +205,14 @@ TRUNCATE Booking3;
 ALTER table Booking3
 ADD UNIQUE (session_id);
 
-INSERT INTO Booking3 (volunteer_id, session_id, is_cancelled, cancellation_timestamp, cancellation_reason)
+INSERT INTO booking (volunteer_id, session_id, is_cancelled, cancellation_timestamp, cancellation_reason)
 VALUES
   ('1', '1', true, '2023-10-06 08:00', 'sick'),
   ('2', '2', true, '2023-10-07 05:00', 'session rescheduled'),
   ('3', '3', true, '2023-10-07 01:00', 'emergency'),
   ('4', '4', true, '2023-10-08 12:00', 'family issue'),
-  ('5', '5', true, '2023-10-08 07:00', 'health issue');
+  ('5', '5', true, '2023-10-08 07:00', 'health issue'),
+  ('6', '6', false, '2023-10-08 05:00',  booked);
 
 
 

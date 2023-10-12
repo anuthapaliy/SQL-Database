@@ -7,6 +7,12 @@ const db = new Pool({
   ssl: { rejectUnauthorized: false },
 });
 
+db.connect(function (err){
+  // if (err) throw err;
+  console.log("Connected to the database");
+});
+
+
 // a. Function to add volunteers
 async function addVolunteers() {
   // No. of volunteers to generate
@@ -63,6 +69,7 @@ async function addAfternoonAndNightSessions() {
     const nightQuery = {
       text: "INSERT INTO Session (date, time, session_type) VALUES ($1, $2, 'Night')",
       values: [date, nightTime],
+    
     };
 
     try {
@@ -114,11 +121,11 @@ async function addChristmasSessions() {
   }
 }
 
-//c. Function to generate random data and allocate sessions to volunteers
+// Function to generate random data and allocate sessions to volunteers
 async function generateDataAndAllocateSessions() {
   try {
     // Initialize sets to store unique sessions and combinations
-    const sessionSet = new Set();
+    const sessionsSet = new Set();
     const allocatedCombinations = new Set();
 
     // Generate random volunteers data
@@ -138,13 +145,17 @@ async function generateDataAndAllocateSessions() {
 
     const volunteerIds = [];
     for (const volunteerData of volunteersData) {
-      const { rows } = await db.query(insertVolunteersQuery, [
-        volunteerData.name,
-        volunteerData.email,
-        volunteerData.phone_number,
-        volunteerData.cancelled,
-      ]);
-      volunteerIds.push(rows[0].id);
+      try {
+        const { rows } = await db.query(insertVolunteersQuery, [
+          volunteerData.name,
+          volunteerData.email,
+          volunteerData.phone_number,
+          volunteerData.cancelled,
+        ]);
+        volunteerIds.push(rows[0].id);
+      } catch (error) {
+        console.error("Error inserting volunteer:", error);
+      }
     }
 
     // Generate random session data
@@ -173,15 +184,15 @@ async function generateDataAndAllocateSessions() {
 
       // Check and insert morning session
       const morningSessionKey = `${morningSession.date}-${morningSession.time}`;
-      if (!sessionSet.has(morningSessionKey)) {
-        sessionSet.add(morningSessionKey);
+      if (!sessionsSet.has(morningSessionKey)) {
+        sessionsSet.add(morningSessionKey);
         sessionsData.push(morningSession);
       }
 
       // Check and insert evening session
       const eveningSessionKey = `${eveningSession.date}-${eveningSession.time}`;
-      if (!sessionSet.has(eveningSessionKey)) {
-        sessionSet.add(eveningSessionKey);
+      if (!sessionsSet.has(eveningSessionKey)) {
+        sessionsSet.add(eveningSessionKey);
         sessionsData.push(eveningSession);
       }
     }
@@ -192,12 +203,16 @@ async function generateDataAndAllocateSessions() {
 
     const sessionIds = [];
     for (const sessionData of sessionsData) {
-      const { rows } = await db.query(insertSessionsQuery, [
-        sessionData.date,
-        sessionData.time,
-        sessionData.session_type,
-      ]);
-      sessionIds.push(rows[0].id);
+      try {
+        const { rows } = await db.query(insertSessionsQuery, [
+          sessionData.date,
+          sessionData.time,
+          sessionData.session_type,
+        ]);
+        sessionIds.push(rows[0].id);
+      } catch (error) {
+        console.error("Error inserting session:", error);
+      }
     }
 
     // Randomly allocate sessions to volunteers
@@ -229,23 +244,28 @@ async function generateDataAndAllocateSessions() {
 
     // Insert allocated sessions data into the Booking3 table
     const insertAllocatedSessionsQuery =
-      "INSERT INTO Booking3 (volunteer_id, session_id, is_cancelled, cancellation_timestamp, cancellation_reason) VALUES ($1, $2, $3, $4, $5)";
+      "INSERT INTO booking (volunteer_id, session_id, is_cancelled, cancellation_timestamp, cancellation_reason) VALUES ($1, $2, $3, $4, $5)";
 
     for (const allocatedSessionData of allocatedSessionsData) {
-      await db.query(insertAllocatedSessionsQuery, [
-        allocatedSessionData.volunteer_id,
-        allocatedSessionData.session_id,
-        allocatedSessionData.is_cancelled,
-        allocatedSessionData.cancellation_timestamp,
-        allocatedSessionData.cancellation_reason,
-      ]);
-    }
+      try {
+        await db.query(insertAllocatedSessionsQuery, [
+          allocatedSessionData.volunteer_id,
+          allocatedSessionData.session_id,
+          allocatedSessionData.is_cancelled,
+          allocatedSessionData.cancellation_timestamp,
+          allocatedSessionData.cancellation_reason,
+        ]);
 
-    console.log("Data generation and session allocation completed.");
+        // Log the inserted booking record
+        console.log(
+          `Inserted booking record: Volunteer ID ${allocatedSessionData.volunteer_id}, Session ID ${allocatedSessionData.session_id}, Is Cancelled ${allocatedSessionData.is_cancelled}, Cancellation Timestamp ${allocatedSessionData.cancellation_timestamp}, Cancellation Reason ${allocatedSessionData.cancellation_reason}`
+        );
+      } catch (error) {
+        console.error("Error inserting booking record:", error);
+      }
+    }
   } catch (error) {
-    console.error("Error generating data and allocating sessions:", error);
-  } finally {
-    // Release the database connection
+    console.error("Error in generateDataAndAllocateSessions:", error);
   }
 }
 
@@ -270,6 +290,9 @@ function getRandomCancellationReason() {
   const randomIndex = Math.floor(Math.random() * reasons.length);
   return reasons[randomIndex];
 }
+
+
+
 
 // Main function to generate data and allocate sessions
 async function main() {
@@ -297,7 +320,8 @@ async function main() {
   }
 }
 
-// Call the main function
+
+ // Call the main function
 main().catch((error) => {
   console.error("Error:", error);
 });
